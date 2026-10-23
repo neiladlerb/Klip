@@ -277,7 +277,7 @@ td.r,th.r{text-align:right}
 <script>
 (function(){
 "use strict";
-const KEY="klip-demo-v4",SKEY="klip-session",LABKEY="klip-lab-local";
+const KEY="klip-demo-v5",SKEY="klip-session",LABKEY="klip-lab-local";
 const DEFAULT_HASH="d4d094474146caeb0a318f2ff871004afdaca7d1126026a2f8b609809d232c4b";
 const GEN_START="2011-01",GEN_END="2026-09";
 const fmt=new Intl.NumberFormat("es-CL");
@@ -351,10 +351,10 @@ const FN=["Andrea","Carlos","Daniela","Eduardo","Francisca","Gabriel","Isidora",
 const LN=["González","Muñoz","Rojas","Díaz","Pérez","Soto","Contreras","Silva","Martínez","Sepúlveda","Morales","Rodríguez","López","Fuentes","Hernández","Torres","Araya","Flores","Espinoza","Valenzuela","Castillo","Tapia","Reyes","Gutiérrez","Castro","Pizarro","Álvarez","Vásquez","Sánchez","Fernández","Ramírez","Carrasco","Cortés","Herrera","Núñez","Jara","Vergara","Rivera","Figueroa","Riquelme"];
 function seed(){
   const R=rng(20110301);const pick=a=>a[Math.floor(R()*a.length)];const ri=(a,b)=>a+Math.floor(R()*(b-a+1));
-  const used=new Set(["Camila Rojas","Felipe Muñoz","Javiera Contreras","Tomás Herrera","Valentina Díaz","Ignacio Pérez","Daniela Vega","Matías Navarro","Rodrigo Fuentes","María José Soto","Bruce Oshea","Neil Adler","Paula Ibáñez","Andrés Lagos","Carolina Mella"]);
+  const used=new Set(["Camila Rojas","Felipe Muñoz","Javiera Contreras","Tomás Herrera","Valentina Díaz","Ignacio Pérez","Daniela Vega","Matías Navarro","Rodrigo Fuentes","María José Soto","Bruno Salinas","Laura Méndez","Paula Ibáñez","Andrés Lagos","Carolina Mella"]);
   const newName=()=>{for(let i=0;i<300;i++){const n=pick(FN)+" "+pick(LN);if(!used.has(n)){used.add(n);return n}}return "Persona "+ri(100,999)};
   const administradoras=[
-    {id:"a1",nombre:"Oshea Gestión Inmobiliaria",contacto:"Bruce Oshea",ciudad:"Santiago",comuna:"Providencia",comisionAdm:8,desde:"2011-01",wa:""},
+    {id:"a1",nombre:"Salinas Gestión Inmobiliaria",contacto:"Bruno Salinas",ciudad:"Santiago",comuna:"Providencia",comisionAdm:8,desde:"2011-01",wa:""},
     {id:"a2",nombre:"Cordillera Administraciones",contacto:"Paula Ibáñez",ciudad:"Santiago",comuna:"Las Condes",comisionAdm:7,desde:"2012-04",wa:""},
     {id:"a3",nombre:"Pacífico Gestión de Arriendos",contacto:"Andrés Lagos",ciudad:"Valparaíso",comuna:"Viña del Mar",comisionAdm:8.5,desde:"2013-09",wa:""},
     {id:"a4",nombre:"Austral Propiedades",contacto:"Carolina Mella",ciudad:"Concepción",comuna:"Concepción",comisionAdm:7.5,desde:"2015-02",wa:""}];
@@ -420,11 +420,11 @@ function seed(){
   tenants.slice(0,8).forEach(t=>U(t.nombre,slug(t.nombre)+"@demo.klip.cl","tenant",t.id));
   owners.slice(0,3).forEach(o=>U(o.nombre,slug(o.nombre)+"@demo.klip.cl","owner",o.id));
   administradoras.forEach(a=>U(a.contacto,slug(a.contacto)+"@demo.klip.cl","admin",a.id));
-  U("Neil Adler","neil.adler@demo.klip.cl","bo","bo");
-  return {v:4,params:{uf:40500,ipc:4.1,comision:2.5,diaVenc:5,gracia:5,
+  U("Laura Méndez","laura.mendez@demo.klip.cl","bo","bo");
+  return {v:5,params:{uf:40500,ipc:4.1,comision:2.5,diaVenc:5,gracia:5,
       medios:{"Tarjeta de crédito":true,"Tarjeta de débito":true,"Tarjeta retail":true,"Transferencia":true},
       plantilla:"Hola {nombre}, te escribimos de KLIP. Tu arriendo de {direccion} por {monto} vence el {vence}. Puedes pagarlo en línea con tarjeta de crédito, débito o transferencia. Gracias.",
-      bienvenida:{activo:true,mostrado:false,texto:"Te regalo KLIP, la plataforma de arriendos que diseñé en 2011, reconstruida para que la administres tú.\nUn abrazo,\nNeil"}},
+      bienvenida:{activo:false,mostrado:false,titulo:"Te damos la bienvenida, {nombre}",texto:"KLIP reúne en un solo lugar tu cartera, los cobros, las liquidaciones y las reparaciones.\nCualquier duda, escríbenos desde la plataforma."}},
     periodo:{ym:"2026-10",vence:"2026-11-05"},administradoras,owners,tenants,exT,props,hist,users,provNew:[],
     repairs:[
       {id:"r1",propId:"P001",tenantId:"t1",cat:"Cerrajería",desc:"Cambio de chapa de la puerta principal",provId:"pv11",monto:60000,cuotas:2,estado:"solicitada",fecha:"2026-10-14",aprobProp:null,conformArr:null,inicioDesc:null,descontadas:0,rating:null},
@@ -434,7 +434,7 @@ function seed(){
       {id:"m1",from:"a1",to:"t1",text:"Hola Camila, ya está disponible el cobro de octubre. Recuerda que vence el 05-11-2026.",fecha:"2026-10-01",read:false,canal:"plataforma"},
       {id:"m2",from:"t1",to:"o1",text:"Rodrigo, la chapa de la puerta principal está fallando. Dejé la solicitud de reparación en la plataforma.",fecha:"2026-10-14",read:false,canal:"plataforma"},
       {id:"m3",from:"a1",to:"t3",text:"Javiera, registramos un saldo pendiente de septiembre. ¿Podemos ayudarte con alguna opción de pago?",fecha:"2026-10-08",read:false,canal:"whatsapp"},
-      {id:"m4",from:"o2",to:"a1",text:"Bruce, ¿cómo va la cobranza de Las Violetas? Ya son dos meses.",fecha:"2026-10-12",read:false,canal:"plataforma"},
+      {id:"m4",from:"o2",to:"a1",text:"Bruno, ¿cómo va la cobranza de Las Violetas? Ya son dos meses.",fecha:"2026-10-12",read:false,canal:"plataforma"},
       {id:"m5",from:"o1",to:"t2",text:"Felipe, ya aprobé el cambio del calefont. Cuando Cristián lo instale, confirma en la plataforma para que empiece el descuento.",fecha:"2026-10-10",read:false,canal:"plataforma"}],
     audit:[
       {f:"2026-10-01 08:00",who:"Sistema",tipo:"Cobros",det:"Emitidos los cobros de Octubre 2026"},
@@ -443,9 +443,9 @@ function seed(){
 }
 let S;
 try{S=JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){S=null}
-if(!S||S.v!==4)S=seed();
+if(!S||S.v!==5)S=seed();
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast("No se pudieron guardar los cambios en este navegador")}};
-function log(tipo,det,who){S.audit.push({f:nowISO(),who:who||(cur()?cur().nombre:"Visitante"),tipo,det});if(S.audit.length>400)S.audit=S.audit.slice(-400)}
+function log(tipo,det,who){const real=ui.asUid&&sessUser()&&cur()?sessUser().nombre+" (como "+cur().nombre+")":cur()?cur().nombre:"Visitante";S.audit.push({f:nowISO(),who:who||real,tipo,det});if(S.audit.length>400)S.audit=S.audit.slice(-400)}
 
 /* Historia generada 2011 a 2026: determinista, se recalcula al cargar y no ocupa espacio */
 let GEN={hist:[],reps:[]};
@@ -521,7 +521,7 @@ const repActive=r=>r.estado==="conforme"&&r.descontadas<r.cuotas&&!r.gen;
 const repairsOn=p=>S.repairs.filter(r=>r.propId===p.id&&repActive(r));
 const cuota=r=>Math.round(r.monto/r.cuotas);
 const descuento=p=>repairsOn(p).reduce((a,r)=>a+cuota(r),0);
-const aPagarArriendo=p=>p.paid?0:Math.max(0,rentCLP(p)+p.deuda-descuento(p));
+const aPagarArriendo=p=>p.paid?0:Math.max(0,rentCLP(p)+p.deuda-descuento(p)-(p.abono||0));
 const aPagarGC=p=>p.gcPaid?0:p.gc.monto+p.gcDeuda;
 function estado(p){
   if(!p.tenantId)return {k:"vacia",t:"Sin arrendatario",c:"p-mute"};
@@ -681,7 +681,7 @@ function landing(){
 }
 
 /* Login y registro */
-const DEMO_ACC=[["admin","bruce.oshea@demo.klip.cl"],["tenant","camila.rojas@demo.klip.cl"],["owner","rodrigo.fuentes@demo.klip.cl"],["bo","neil.adler@demo.klip.cl"]];
+const DEMO_ACC=[["admin","bruno.salinas@demo.klip.cl"],["tenant","camila.rojas@demo.klip.cl"],["owner","rodrigo.fuentes@demo.klip.cl"],["bo","laura.mendez@demo.klip.cl"]];
 const authHead=()=>`<header class="wrap nav"><button data-act="home" style="background:none;border:0;cursor:pointer;padding:0" aria-label="Volver a la portada">${LOGO(190,true)}</button></header>`;
 function loginView(){
   return `${authHead()}<main class="wrap login">
@@ -769,7 +769,7 @@ function shell(){
   const pend=S.repairs.filter(x=>{const p=prop(x.propId);if(!p)return false;if(x.estado==="solicitada")return (r==="admin"&&p.adminId===me)||(r==="owner"&&p.ownerId===me);if(x.estado==="aprobada")return r==="tenant"&&x.tenantId===me;return false}).length;
   const labOpen=LAB.items.filter(i=>i.estado==="Propuesta").length;
   const tabs=TABS[r].map(([k,l])=>`<button class="tab" data-act="tab" data-tab="${k}" ${ui.tab===k?'aria-current="page"':""}>${l}${k==="mensajes"&&unr?`<span class="badge">${unr}</span>`:""}${(k==="solicitudes"||k==="reparaciones")&&pend?`<span class="badge">${pend}</span>`:""}${k==="lab"&&labOpen?`<span class="badge" style="background:var(--bo)">${labOpen}</span>`:""}</button>`).join("");
-  const imp=ui.asUid?`<div class="imp"><div class="wrap"><span>Estás viendo la plataforma como <b>${esc(u.nombre)}</b> (${ROLES[r]}). Las acciones quedan registradas a su nombre en la auditoría.</span><button class="btn sm" data-act="stopimp">Volver al back office</button></div></div>`:"";
+  const imp=ui.asUid?`<div class="imp"><div class="wrap"><span>Estás viendo la plataforma como <b>${esc(u.nombre)}</b> (${ROLES[r]}). Lo que hagas queda en la auditoría con tu nombre y el suyo. No puedes firmar actas en su nombre.</span><button class="btn sm" data-act="stopimp">Volver al back office</button></div></div>`:"";
   const emp=r==="admin"?empresaDe(me):"";
   return `<header class="top ${r==="bo"?"is-bo":""}"><div class="wrap">
       <button class="logo" data-act="tab" data-tab="${TABS[r][0][0]}" aria-label="Ir al inicio">${LOGO(150,false)}${r==="bo"?'<span class="bo-tag">Back office</span>':""}</button><span class="spacer"></span>
@@ -854,8 +854,8 @@ function vRepairs(){
   return `<div class="welcome"><h1>Reparaciones</h1><p>Lo que aprueban propietario y arrendatario se descuenta del arriendo. ${firmadas.length} reparaciones firmadas por ${clp(totalDesc)}.</p><span style="flex:1"></span>${p0?`<button class="btn" data-act="newrep" data-id="${p0.id}">Solicitar reparación</button>`:""}</div>
   <div class="panel"><div class="panel-h"><div class="chips"><button class="chip" data-act="repf" data-v="activas" aria-pressed="${ui.repFilter==="activas"}">En curso (${activas.length})</button><button class="chip" data-act="repf" data-v="hist" aria-pressed="${ui.repFilter!=="activas"}">Historial firmado (${firmadas.length})</button></div></div>
   ${shown.length?`<div class="tbl-wrap"><table><thead><tr><th>Fecha</th><th>Propiedad</th><th>Reparación</th><th>Proveedor</th><th class="r">Monto</th><th>Descuento</th><th>Estado</th><th></th></tr></thead><tbody>${shown.slice(0,120).map(x=>{const p=prop(x.propId),pv=provById(x.provId);
-    const canApprove=x.estado==="solicitada"&&((r==="owner"&&p.ownerId===me)||(r==="admin"&&p.adminId===me));
-    const canConf=x.estado==="aprobada"&&r==="tenant"&&x.tenantId===me;
+    const canApprove=!ui.asUid&&x.estado==="solicitada"&&((r==="owner"&&p.ownerId===me)||(r==="admin"&&p.adminId===me));
+    const canConf=!ui.asUid&&x.estado==="aprobada"&&r==="tenant"&&x.tenantId===me;
     return `<tr><td class="num">${dmy(x.fecha)}</td><td><span class="code">${p.code}</span><span class="sub">${esc(p.dir)}</span></td><td>${esc(x.desc)}<span class="sub">${esc(x.cat)}, ${esc(nombreActor(x.tenantId))}</span></td><td>${pv?esc(pv.nombre):"Por definir"}</td><td class="r num">${clp(x.monto)}</td><td class="num">${x.cuotas} x ${clp(cuota(x))}</td><td>${repStateLabel(x)}</td><td>${canApprove?`<button class="btn sm ok" data-act="approve" data-id="${x.id}">Revisar</button>`:canConf?`<button class="btn sm ok" data-act="acta" data-id="${x.id}">Confirmar</button>`:`<button class="btn sm sec" data-act="acta" data-id="${x.id}">Ver acta</button>`}</td></tr>`}).join("")}</tbody></table></div>${shown.length>120?`<p class="muted" style="padding:0 18px 14px;font-size:13px">Se muestran las 120 más recientes de ${shown.length}.</p>`:""}`:`<div class="empty">${ui.repFilter==="activas"?"No hay reparaciones en curso.":"Aún no hay reparaciones firmadas."}</div>`}</div>`;
 }
 
@@ -874,7 +874,7 @@ function vOwner(){
   const me=meActor(),props=S.props.filter(p=>p.ownerId===me);
   if(!props.length)return `<div class="welcome"><h1>Hola ${esc(nombreActor(me).split(" ")[0])}</h1></div><div class="panel empty"><h2 style="margin-bottom:8px">Aún no tienes propiedades en KLIP</h2><p>Tu administradora puede cargarlas con tu correo <b>${esc(cur().email)}</b>.</p></div>`;
   const neto=props.map(liquidacion).reduce((a,l)=>a+l.neto,0);
-  const pend=props.filter(p=>p.tenantId&&!p.paid).reduce((a,p)=>a+rentCLP(p)+p.deuda,0);
+  const pend=props.filter(p=>p.tenantId&&!p.paid).reduce((a,p)=>a+rentCLP(p)+p.deuda-(p.abono||0),0);
   const rented=props.filter(p=>p.tenantId);
   const rprom=rented.length?rented.reduce((a,p)=>a+rentab(p),0)/rented.length:0;
   const sectores={};props.forEach(p=>{(sectores[p.comuna]=sectores[p.comuna]||[]).push(p)});
@@ -914,7 +914,7 @@ function scopeProps(scope){if(!scope)return S.props;if(scope==="mine")return myP
 function vAdminHome(){
   const props=myProps(),c=adminCounts(props),A=byId(S.administradoras,meActor());
   const deudaMo=c.mo.reduce((a,p)=>a+p.deuda,0),vacioVal=c.va.reduce((a,p)=>a+rentCLP(p),0);
-  return `<div class="welcome"><h1>Panel de control</h1><p>${esc(A?A.nombre:"")}, ${ymLabel(S.periodo.ym)}, vencimiento ${dmy(S.periodo.vence)}</p><span style="flex:1"></span><button class="btn sec sm" data-act="closemonth">Cerrar mes y emitir cobros</button></div>
+  return `<div class="welcome"><h1>Panel de control</h1><p>${esc(A?A.nombre:"")}, ${ymLabel(S.periodo.ym)}, vencimiento ${dmy(S.periodo.vence)}</p></div>
   ${props.length?"":`<div class="note" style="margin-bottom:16px">Tu cartera está vacía. Empieza cargando tu primera propiedad en <button class="link" data-act="tab" data-tab="propiedades">Cartera</button>.</div>`}
   <div class="grid g-side"><div class="grid">
     <div class="panel"><div class="panel-h"><h2>Resumen</h2><span class="eyebrow">Cartera administrada</span></div><div class="panel-b grid">
@@ -1015,7 +1015,7 @@ function vBoPanel(){
   const medios={};const desde=ymAdd(ym,-11);H.forEach(h=>{if(h.ym>=desde)medios[h.md]=(medios[h.md]||0)+h.m});const totM=Object.values(medios).reduce((a,b)=>a+b,0)||1;
   const porRol=r=>S.users.filter(u=>u.role===r).length;
   const labIdeas=LAB.items.filter(i=>i.tipo==="Idea"&&i.estado!=="Descartada"&&i.estado!=="Hecha").length;
-  return `<div class="welcome"><h1>Control del sistema</h1><p>${ymLabel(ym)}. ${S.administradoras.length} administradoras, ${S.props.length} propiedades, ${fmt.format(H.length)} pagos registrados desde 2011.</p></div>
+  return `<div class="welcome"><h1>Control del sistema</h1><p>${ymLabel(ym)}. ${S.administradoras.length} administradoras, ${S.props.length} propiedades, ${fmt.format(H.length)} pagos registrados desde 2011.</p><span style="flex:1"></span>${ui.asUid?"":`<button class="btn bo sm" data-act="closemonth">Cerrar mes y emitir cobros</button>`}</div>
   <div class="grid g-4" style="margin-bottom:18px">
     <div class="panel kpi"><div class="l">Volumen procesado</div><div class="v num">${clp(vol)}</div><div class="d muted">${tx.length} transacciones en el mes</div></div>
     <div class="panel kpi ok"><div class="l">Comisión KLIP</div><div class="v num">${clp(com)}</div><div class="d muted">${String(S.params.comision).replace(".",",")}% sobre lo procesado</div></div>
@@ -1081,7 +1081,7 @@ function vParams(){
       <p class="muted" style="margin:0;font-size:13px">Los arrendatarios solo ven los medios habilitados al pagar.</p>
     </div></div>
     <div class="panel"><div class="panel-h"><h2>Plantilla de recordatorio por WhatsApp</h2></div><div class="panel-b form"><div class="field"><label for="p_tpl">Texto</label><textarea id="p_tpl" rows="5">${esc(p.plantilla)}</textarea></div><span class="muted" style="font-size:13px">Puedes usar {nombre}, {direccion}, {monto} y {vence}.</span></div></div>
-    <div class="panel"><div class="panel-h"><h2>Bienvenida para Bruce</h2></div><div class="panel-b form"><label class="check"><input type="checkbox" id="p_bon" ${b.activo?"checked":""}> Mostrar el mensaje de cumpleaños la primera vez que Bruce entre</label><div class="field"><label for="p_btxt">Mensaje</label><textarea id="p_btxt" rows="5">${esc(b.texto)}</textarea></div><span class="muted" style="font-size:13px">${b.mostrado?"Ya se mostró en este navegador. ":"Aún no se ha mostrado. "}<button type="button" class="link" data-act="bdaypreview">Ver cómo se verá</button>${b.mostrado?' o <button type="button" class="link" data-act="bdayreset">volver a mostrarlo</button>':""}</span></div></div>
+    <div class="panel"><div class="panel-h"><h2>Bienvenida para ${esc(bdayNombre())}</h2></div><div class="panel-b form"><label class="check"><input type="checkbox" id="p_bon" ${b.activo?"checked":""}> Mostrar el mensaje de bienvenida la primera vez que ${esc(bdayNombre())} entre</label><div class="field"><label for="p_btit">Título</label><input id="p_btit" maxlength="80" value="${esc(b.titulo||"")}" placeholder="Te damos la bienvenida, {nombre}"></div><div class="field"><label for="p_btxt">Mensaje</label><textarea id="p_btxt" rows="5">${esc(b.texto)}</textarea></div><span class="muted" style="font-size:13px">${b.mostrado?"Ya se mostró en este navegador. ":"Aún no se ha mostrado. "}<button type="button" class="link" data-act="bdaypreview">Ver cómo se verá</button>${b.mostrado?' o <button type="button" class="link" data-act="bdayreset">volver a mostrarlo</button>':""}</span></div></div>
     <div style="grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap"><button class="btn bo" type="submit">Guardar parámetros</button></div>
   </form>
   <div class="panel" style="margin-top:18px"><div class="panel-h"><h2>Datos de la demo</h2></div><div class="panel-b" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span class="muted">${S.props.length} propiedades, ${fmt.format(histAll().length)} pagos (${S.hist.length} del periodo actual), ${S.msgs.length} mensajes y ${S.audit.length} eventos.</span><span style="flex:1"></span><button class="btn bad sm" data-act="reset">Restablecer datos de ejemplo</button></div></div>`;
@@ -1164,10 +1164,11 @@ function closeModal(){if(mroot.dataset.locked)return;mroot.innerHTML="";if(lastF
 let tTimer;
 function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.hidden=false;clearTimeout(tTimer);tTimer=setTimeout(()=>t.hidden=true,3400)}
 
+const bdayNombre=()=>{const a=byId(S.administradoras,"a1");return a?a.contacto.split(" ")[0]:"Administradora"};
 function mBday(preview){
-  const b=S.params.bienvenida;
-  openModal("Un regalo para ti",`<div class="bday"><div class="big">Feliz cumpleaños, Bruce</div>${LOGO(220,true)}<p>${esc(b.texto)}</p></div>`,`<button class="btn lg" data-act="close">Entrar a mi panel</button>`);
-  if(!preview){b.mostrado=true;log("Bienvenida","Se mostró el mensaje de cumpleaños");save()}
+  const b=S.params.bienvenida,tit=(b.titulo||"Te damos la bienvenida, {nombre}").replace(/\{nombre\}/g,bdayNombre());
+  openModal("Bienvenida",`<div class="bday"><div class="big">${esc(tit)}</div>${LOGO(220,true)}<p>${esc(b.texto)}</p></div>`,`<button class="btn lg" data-act="close">Entrar a mi panel</button>`);
+  if(!preview){b.mostrado=true;log("Bienvenida","Se mostró el mensaje de bienvenida");save()}
 }
 function mDetail(id){
   const p=prop(id),reps=repairsOn(p);
@@ -1175,6 +1176,7 @@ function mDetail(id){
   <div class="lines"><div><span>Mes</span><span>${ymLabel(S.periodo.ym)}</span></div><div><span>Vence</span><span>${dmy(S.periodo.vence)}</span></div>
   <div><span>Arriendo del mes${p.moneda==="UF"?" (UF "+fmt.format(p.monto)+" x "+clp(UF())+")":""}</span><span class="num">${clp(rentCLP(p))}</span></div>
   <div><span>Saldo anterior</span><span class="num">${clp(p.deuda)}</span></div>
+  ${p.abono?`<div><span>Abonado este mes</span><span class="num">-${clp(p.abono)}</span></div>`:""}
   ${reps.map(r=>`<div><span>Reparación aprobada por ambas partes: ${esc(r.desc)} (cuota ${r.descontadas+1} de ${r.cuotas}) <button class="link" data-act="acta" data-id="${r.id}">ver acta</button></span><span class="num">-${clp(cuota(r))}</span></div>`).join("")||`<div><span>Descuentos aprobados</span><span class="num">$0</span></div>`}
   <div class="tot"><span>Total a pagar</span><span class="num">${clp(aPagarArriendo(p))}</span></div>
   <p style="margin:12px 0 0"><b>Descripción:</b> ${esc(p.desc)}</p></div></div>`,
@@ -1196,7 +1198,7 @@ function mPay(items){
 function payArriendo(p,medio){
   const m=aPagarArriendo(p),dsc=descuento(p),reps=repairsOn(p),hoy=todayISO();
   S.hist.push({id:uid("h"),f:hoy,ym:S.periodo.ym,p:p.id,t:p.tenantId,c:"A",m,md:medio,d:dsc,r:reps.length?reps[0].id:null});
-  reps.forEach(r=>r.descontadas++);p.paid=true;p.deuda=0;p.lastPay=hoy;return m;
+  reps.forEach(r=>r.descontadas++);p.paid=true;p.deuda=0;p.abono=0;p.lastPay=hoy;return m;
 }
 function doPay(){
   const f=document.getElementById("payform");if(!f)return;
@@ -1245,7 +1247,7 @@ function mActa(id){
   const r=repsAll().find(x=>x.id===id);if(!r)return;
   const p=prop(r.propId),pv=provById(r.provId),o=ownerOf(p);
   const sched=r.inicioDesc?Array.from({length:r.cuotas},(_,k)=>({ym:ymAdd(r.inicioDesc,k),ok:k<r.descontadas})):[];
-  const canConf=r.estado==="aprobada"&&role()==="tenant"&&r.tenantId===meActor();
+  const canConf=!ui.asUid&&r.estado==="aprobada"&&role()==="tenant"&&r.tenantId===meActor();
   const firma=(t,f,who)=>f?`<div class="firma ok"><span class="eyebrow">${t}</span><b>${esc(f.nombre)}</b><span class="sub">${esc(f.rol||"")}${f.mandato?", con mandato del propietario":""}. Firmado el ${dmy(f.fecha)}</span></div>`:`<div class="firma"><span class="eyebrow">${t}</span><b>${esc(who)}</b><span class="sub">Pendiente</span></div>`;
   openModal("Acta de reparación",`<div class="acta">
     <div class="lines"><div><span>Propiedad</span><span>${esc(p.code)}, ${esc(p.dir)}</span></div><div><span>Solicitada</span><span>${dmy(r.fecha)} por ${esc(nombreActor(r.tenantId))}</span></div><div><span>Reparación</span><span>${esc(r.cat)}: ${esc(r.desc)}</span></div><div><span>Proveedor</span><span>${pv?esc(pv.nombre)+(pv.sec?" (SEC)":""):"Por definir"}</span></div><div class="tot"><span>Monto aprobado</span><span class="num">${clp(r.monto)} en ${r.cuotas} ${r.cuotas===1?"cuota":"cuotas"} de ${clp(cuota(r))}</span></div></div>
@@ -1297,9 +1299,16 @@ function mNewProp(){
   <div class="row"><div class="field"><label for="pgc">Comunidad</label><input id="pgc" placeholder="Comunidad Edificio Italia"></div><div class="field"><label for="pgcm">Gasto común mensual ($)</label><input id="pgcm" type="number" min="0" step="1000" placeholder="75000"></div></div>
   <p class="muted" style="margin:0;font-size:13px">A un arrendatario nuevo se le crea una cuenta con contraseña temporal.</p></form>`,`<button class="btn sec" data-act="close">Cancelar</button><button class="btn" data-act="saveprop">Guardar propiedad</button>`);
 }
+function mManual(id){
+  const p=prop(id),t=tenantOf(p),tot=aPagarArriendo(p);
+  if(!tot){toast("No hay montos pendientes");return}
+  openModal("Registrar pago recibido",`<form id="manform" class="form" data-id="${p.id}"><div class="lines"><div><span>Arrendatario</span><span>${esc(t?t.nombre:"")}</span></div><div><span>Propiedad</span><span>${esc(p.dir)}</span></div><div class="tot"><span>Pendiente de ${ymLabel(S.periodo.ym)}</span><span class="num">${clp(tot)}</span></div></div>
+  <div class="row"><div class="field"><label for="manmonto">Monto recibido ($)</label><input id="manmonto" type="number" min="1" max="${tot}" step="1" required value="${tot}"></div><div class="field"><label for="manmedio">Medio</label><select id="manmedio"><option>Transferencia</option><option>Depósito bancario</option><option>Efectivo</option><option>Cheque</option></select></div></div>
+  <p class="muted" style="margin:0;font-size:13px">Si el monto es menor que lo pendiente, se registra como abono y el resto sigue por cobrar. Queda en la auditoría con tu nombre.</p><div id="manerr"></div></form>`,`<button class="btn sec" data-act="close">Cancelar</button><button class="btn ok" data-act="domanual">Registrar pago</button>`);
+}
 function mCloseMonth(){
-  const pend=myProps().filter(p=>p.tenantId&&!p.paid);
-  openModal("Cerrar "+ymLabel(S.periodo.ym),`<p style="margin-top:0">Se emitirán los cobros de ${ymLabel(ymAdd(S.periodo.ym,1))} para toda la plataforma. Los arriendos y gastos comunes no pagados pasan como saldo anterior. En tu cartera:</p>${pend.length?`<div class="lines">${pend.map(p=>`<div><span>${esc(tenantOf(p).nombre)}, ${esc(p.dir)}</span><span class="num">${clp(rentCLP(p)-descuento(p))}</span></div>`).join("")}</div>`:'<p class="muted">Todos los arriendos están pagados.</p>'}`,`<button class="btn sec" data-act="close">Cancelar</button><button class="btn" data-act="doclose">Cerrar mes</button>`);
+  const pend=S.props.filter(p=>p.tenantId&&!p.paid);
+  openModal("Cerrar "+ymLabel(S.periodo.ym),`<p style="margin-top:0">Se emitirán los cobros de ${ymLabel(ymAdd(S.periodo.ym,1))} para toda la plataforma. Los arriendos y gastos comunes no pagados pasan como saldo anterior. Pendientes en este momento:</p>${pend.length?`<div class="lines">${pend.map(p=>`<div><span>${esc(tenantOf(p).nombre)}, ${esc(p.dir)}<span class="sub">${esc((admOf(p)||{}).nombre||"")}</span></span><span class="num">${clp(aPagarArriendo(p))}</span></div>`).join("")}</div>`:'<p class="muted">Todos los arriendos están pagados.</p>'}`,`<button class="btn sec" data-act="close">Cancelar</button><button class="btn" data-act="doclose">Cerrar mes</button>`);
 }
 const tempPw=()=>"Klip-"+Math.floor(1000+Math.random()*9000)+String.fromCharCode(65+Math.floor(Math.random()*26));
 function showTemp(u,pw,title){
@@ -1366,15 +1375,15 @@ document.addEventListener("click",async e=>{
     case "saverep":{const f=document.getElementById("repform");if(!f.reportValidity())return;const p=prop(f.dataset.id),d=document.getElementById("rdesc").value.trim(),c=Number(document.getElementById("rcuotas").value),cat=document.getElementById("rcat").value,pv=document.getElementById("rprov").value||null;
       S.repairs.push({id:uid("r"),propId:p.id,tenantId:p.tenantId,cat,desc:d,provId:pv,monto:Number(document.getElementById("rmonto").value),cuotas:c,estado:"solicitada",fecha:todayISO(),aprobProp:null,conformArr:null,inicioDesc:null,descontadas:0,rating:null});
       S.msgs.push({id:uid("m"),from:p.tenantId,to:p.ownerId,text:"Nueva solicitud de reparación ("+cat+"): "+d,fecha:todayISO(),read:false,canal:"plataforma"});log("Reparación","Solicitud en "+p.dir+": "+d);save();closeModal();if(role()==="tenant")ui.tab="reparaciones";ui.repFilter="activas";render();toast("Solicitud enviada al propietario y a la administradora");break;}
-    case "approve":mApprove(el.dataset.id);break;
-    case "doapprove":{const r=byId(S.repairs,el.dataset.id);const n=Number(document.getElementById("acuotas").value),m=Number(document.getElementById("amonto").value);if(!(m>0)){toast("Indica un monto válido");return}
+    case "approve":if(!ui.asUid)mApprove(el.dataset.id);break;
+    case "doapprove":{if(ui.asUid){toast("No se pueden firmar actas en nombre de otro usuario");return}const r=byId(S.repairs,el.dataset.id);const n=Number(document.getElementById("acuotas").value),m=Number(document.getElementById("amonto").value);if(!(m>0)){toast("Indica un monto válido");return}
       r.cuotas=n;r.monto=m;r.provId=document.getElementById("aprov").value||r.provId;r.estado="aprobada";r.aprobProp=Object.assign(sig(),role()==="admin"?{mandato:true}:{});
       S.msgs.push({id:uid("m"),from:meActor(),to:r.tenantId,text:"Aprobé la reparación \""+r.desc+"\" por "+clp(m)+" en "+n+(n===1?" cuota":" cuotas")+". Cuando el trabajo esté listo, confirma tu conformidad en KLIP para que empiece el descuento.",fecha:todayISO(),read:false,canal:"plataforma"});
       log("Reparación aprobada",r.desc+", "+clp(m)+" en "+n+" cuotas");save();closeModal();render();toast("Aprobada. Falta la conformidad del arrendatario");break;}
-    case "doconf":{const r=byId(S.repairs,el.dataset.id);r.conformArr=sig();r.estado="conforme";r.inicioDesc=S.periodo.ym;r.rating=Number(document.getElementById("crat").value);const p=prop(r.propId);
+    case "doconf":{if(ui.asUid){toast("No se pueden firmar actas en nombre de otro usuario");return}const r=byId(S.repairs,el.dataset.id);r.conformArr=sig();r.estado="conforme";r.inicioDesc=S.periodo.ym;r.rating=Number(document.getElementById("crat").value);const p=prop(r.propId);
       S.msgs.push({id:uid("m"),from:r.tenantId,to:p.ownerId,text:"Confirmé que la reparación \""+r.desc+"\" quedó bien. El descuento de "+clp(cuota(r))+" empieza este mes.",fecha:todayISO(),read:false,canal:"plataforma"});
       log("Reparación conforme",r.desc+", acta firmada por ambas partes");save();closeModal();render();toast("Acta firmada por ambas partes. El descuento ya está en tu cobro");break;}
-    case "reject":{const r=byId(S.repairs,el.dataset.id);r.estado="rechazada";S.msgs.push({id:uid("m"),from:meActor(),to:r.tenantId,text:"No aprobamos la reparación \""+r.desc+"\". Escríbenos para revisarla.",fecha:todayISO(),read:false,canal:"plataforma"});log("Reparación rechazada",r.desc);save();closeModal();render();toast("Solicitud rechazada y arrendatario notificado");break;}
+    case "reject":{if(ui.asUid){toast("No se pueden firmar actas en nombre de otro usuario");return}const r=byId(S.repairs,el.dataset.id);r.estado="rechazada";S.msgs.push({id:uid("m"),from:meActor(),to:r.tenantId,text:"No aprobamos la reparación \""+r.desc+"\". Escríbenos para revisarla.",fecha:todayISO(),read:false,canal:"plataforma"});log("Reparación rechazada",r.desc);save();closeModal();render();toast("Solicitud rechazada y arrendatario notificado");break;}
     case "compose":if(contacts().includes(el.dataset.to))mCompose(el.dataset.to);break;
     case "sendc":{const f=document.getElementById("cform"),t=document.getElementById("ctext");if(!t.value.trim()){t.focus();return}S.msgs.push({id:uid("m"),from:meActor(),to:f.dataset.to,text:t.value.trim(),fecha:todayISO(),read:false,canal:"plataforma"});save();closeModal();render();toast("Mensaje enviado a "+nombreActor(f.dataset.to));break;}
     case "cwa":{const f=document.getElementById("cform"),t=document.getElementById("ctext").value.trim();mWhatsApp(f.dataset.to,t);break;}
@@ -1387,7 +1396,13 @@ document.addEventListener("click",async e=>{
       save();setTimeout(()=>{closeModal();render();toast("WhatsApp abierto. La conversación quedó registrada")},60);break;}
     case "setwa":mWhatsApp(el.dataset.id,"Hola "+nombreActor(el.dataset.id).split(" ")[0]+", te escribimos de KLIP.");break;
     case "remind":{const p=prop(el.dataset.id),t=tenantOf(p);const text=fillTpl(p);S.msgs.push({id:uid("m"),from:p.adminId,to:t.id,text,fecha:todayISO(),read:false,canal:"plataforma"});log("Recordatorio de cobro",t.nombre+", "+p.dir);save();render();mWhatsApp(t.id,text);toast("Recordatorio enviado en la plataforma");break;}
-    case "manual":{const p=prop(el.dataset.id);const m=payArriendo(p,"Registro manual");log("Pago manual",clp(m)+" en "+p.dir);save();render();toast("Pago de "+clp(m)+" registrado");break;}
+    case "manual":mManual(el.dataset.id);break;
+    case "domanual":{const f=document.getElementById("manform");if(!f.reportValidity())return;const p=prop(f.dataset.id),tot=aPagarArriendo(p),m=Math.round(Number(document.getElementById("manmonto").value)),md=document.getElementById("manmedio").value,err=document.getElementById("manerr");
+      if(p.paid||!tot){closeModal();toast("Este arriendo ya está pagado");break}
+      if(!(m>0)||m>tot){err.innerHTML=`<div class="err">El monto debe ser mayor que cero y no superar ${clp(tot)}.</div>`;return}
+      if(m===tot){payArriendo(p,md+" (registro manual)");log("Pago manual",clp(m)+" con "+md+" en "+p.dir)}
+      else{const hoy=todayISO();S.hist.push({id:uid("h"),f:hoy,ym:S.periodo.ym,p:p.id,t:p.tenantId,c:"A",m,md:md+" (abono manual)",d:0,r:null});p.abono=(p.abono||0)+m;p.lastPay=hoy;log("Abono manual",clp(m)+" con "+md+" en "+p.dir+", queda "+clp(tot-m))}
+      save();closeModal();render();toast(m===tot?"Pago de "+clp(m)+" registrado":"Abono de "+clp(m)+" registrado. Queda "+clp(tot-m));break;}
     case "newprop":mNewProp();break;
     case "saveprop":{const f=document.getElementById("pform");if(!f.reportValidity())return;const v=id=>document.getElementById(id).value.trim();
       const nIdx=S.props.length+1,id="P"+pad3(nIdx)+uid("").slice(0,3);let tid=null,temp=null,nu=null,oid=v("pown");
@@ -1403,8 +1418,10 @@ document.addEventListener("click",async e=>{
       if(nu)showTemp(nu,temp,"Cuenta creada para el arrendatario");else toast("Propiedad C:"+pad3(nIdx)+" creada");break;}
     case "saveuf":{const u=Number(document.getElementById("uf").value);if(u>0){S.params.uf=Math.round(u);log("Parámetro","UF actualizada a "+clp(S.params.uf));save();render();toast("UF actualizada a "+clp(S.params.uf))}break;}
     case "applyipc":{const pct=Number(document.getElementById("ipc").value);if(!(pct>-50&&pct<50)){toast("Ingresa una variación IPC válida");return}S.params.ipc=pct;const hoy=todayISO();let c=0;myProps().forEach(p=>{if(p.tenantId&&p.reajuste.tipo==="IPC"&&proxReajuste(p)<=hoy){p.monto=Math.round(p.monto*(1+pct/100)/1000)*1000;while(proxReajuste(p)<=hoy)p.reajuste.ultimo=proxReajuste(p);c++;S.msgs.push({id:uid("m"),from:p.adminId,to:p.tenantId,text:"Tu arriendo se reajustó por IPC ("+String(pct).replace(".",",")+"%). Nuevo canon: "+clp(p.monto)+".",fecha:hoy,read:false,canal:"plataforma"})}});log("Reajuste IPC",c+" contratos, "+String(pct).replace(".",",")+"%");save();render();toast(c+" contrato"+(c===1?"":"s")+" reajustado"+(c===1?"":"s"));break;}
-    case "closemonth":mCloseMonth();break;
-    case "doclose":{S.props.forEach(p=>{if(p.tenantId){if(!p.paid)p.deuda+=Math.max(0,rentCLP(p)-descuento(p));if(!p.gcPaid)p.gcDeuda+=p.gc.monto;p.paid=false;p.gcPaid=false}});
+    case "closemonth":if(role()==="bo"&&!ui.asUid)mCloseMonth();break;
+    case "doclose":{if(role()!=="bo"||ui.asUid)return;
+      /* El saldo impago ya lleva aplicada la cuota de reparación del mes: se marca como descontada para no repetirla */
+      S.props.forEach(p=>{if(p.tenantId){if(!p.paid){p.deuda=aPagarArriendo(p);repairsOn(p).forEach(r=>r.descontadas++);p.abono=0}if(!p.gcPaid)p.gcDeuda+=p.gc.monto;p.paid=false;p.gcPaid=false}});
       const nx=ymAdd(S.periodo.ym,1);S.periodo={ym:nx,vence:ymAdd(nx,1)+"-"+pad(S.params.diaVenc)};log("Cobros","Emitidos los cobros de "+ymLabel(S.periodo.ym));save();closeModal();render();toast("Cobros de "+ymLabel(S.periodo.ym)+" emitidos");break;}
     case "reset":openModal("Restablecer datos",`<p style="margin:0">Se borran los pagos, usuarios, mensajes y cambios hechos en este navegador y se cargan de nuevo los datos de ejemplo. El Lab no se toca.</p>`,`<button class="btn sec" data-act="close">Cancelar</button><button class="btn bad" data-act="doreset">Restablecer</button>`);break;
     case "doreset":S=seed();buildGen();save();closeModal();ui.uid=null;ui.asUid=null;clearSession();ui.screen="login";render();toast("Datos restablecidos. Vuelve a iniciar sesión");break;
@@ -1419,7 +1436,7 @@ document.addEventListener("click",async e=>{
     case "impersonate":{const u=byId(S.users,el.dataset.id);ui.asUid=u.id;log("Acceso como usuario","Back office entra como "+u.nombre,sessUser().nombre);save();ui.tab=TABS[u.role][0][0];ui.admSel=null;render();window.scrollTo(0,0);break;}
     case "swbo":ui.asBo=!ui.asBo;ui.tab=TABS[role()][0][0];ui.q="";ui.admSel=null;log("Cambio de vista",ui.asBo?"Entra al back office":"Vuelve a su administradora");save();render();window.scrollTo(0,0);break;
     case "togglebo":{const u=byId(S.users,el.dataset.id);u.bo=!u.bo;log(u.bo?"Acceso total concedido":"Acceso total retirado",u.email);save();render();toast(u.nombre+(u.bo?" ya tiene acceso total":" ya no tiene acceso total"));break;}
-    case "stopimp":ui.asUid=null;ui.tab="usuarios";render();window.scrollTo(0,0);break;
+    case "stopimp":log("Fin de acceso como usuario","Back office deja de ver como "+cur().nombre,sessUser().nombre);save();ui.asUid=null;ui.tab="usuarios";render();window.scrollTo(0,0);break;
     case "unlock":{const u=byId(S.users,el.dataset.id);u.bloqueado=false;u.intentos=0;log("Cuenta desbloqueada",u.email);save();render();toast(u.nombre+" puede volver a entrar");break;}
     case "toggleuser":{const u=byId(S.users,el.dataset.id);u.activo=!u.activo;log(u.activo?"Cuenta activada":"Cuenta desactivada",u.email);save();render();toast(u.nombre+(u.activo?" activado":" desactivado"));break;}
     case "resetpw":{const u=byId(S.users,el.dataset.id);const t=tempPw();u.hash=await hashPw(t);u.cambiar=true;u.bloqueado=false;u.intentos=0;log("Contraseña restablecida",u.email);save();render();showTemp(u,t,"Contraseña restablecida");break;}
@@ -1443,7 +1460,7 @@ document.addEventListener("click",async e=>{
       S.provNew=S.provNew||[];S.provNew.push({id:"pvn"+uid(""),nombre:g("vnom"),cat:g("vcat"),ciudad:g("vciu"),comunas:g("vcom")||g("vciu"),sec:document.getElementById("vsec").checked,precio:g("vpre")||"Precio a convenir",desde:Number(S.periodo.ym.slice(0,4)),wa:g("vwa")});
       log("Proveedor agregado",g("vnom")+" ("+g("vcat")+")");save();closeModal();render();toast("Proveedor agregado a la red");break;}
     case "bdaypreview":mBday(true);break;
-    case "bdayreset":S.params.bienvenida.mostrado=false;save();render();toast("Se mostrará de nuevo la próxima vez que Bruce entre");break;
+    case "bdayreset":S.params.bienvenida.mostrado=false;save();render();toast("Se mostrará de nuevo la próxima vez que "+bdayNombre()+" entre");break;
     case "suggest":mLab(null,{tipo:"Idea",area:role()==="tenant"?"Arrendatario":role()==="owner"?"Propietario":"Administrador"});break;
     case "labnew":mLab(null);break;
     case "labedit":mLab(el.dataset.id);break;
@@ -1488,18 +1505,19 @@ document.addEventListener("submit",e=>{
     if(dia!==p.diaVenc){p.diaVenc=dia;S.periodo.vence=S.periodo.vence.slice(0,8)+pad(dia)}
     document.querySelectorAll("[data-medio]").forEach(c=>p.medios[c.dataset.medio]=c.checked);
     const tpl=document.getElementById("p_tpl").value.trim();if(tpl)p.plantilla=tpl;
-    p.bienvenida.activo=document.getElementById("p_bon").checked;const bt=document.getElementById("p_btxt").value.trim();if(bt)p.bienvenida.texto=bt;
+    p.bienvenida.activo=document.getElementById("p_bon").checked;const bt=document.getElementById("p_btxt").value.trim();if(bt)p.bienvenida.texto=bt;const btt=document.getElementById("p_btit").value.trim();if(btt)p.bienvenida.titulo=btt;
     log("Parámetros","UF "+clp(p.uf)+", IPC "+p.ipc+"%, comisión "+p.comision+"%, vencimiento día "+p.diaVenc);save();render();toast("Parámetros guardados");}
 });
 document.addEventListener("keydown",e=>{
   if(e.key==="Escape"&&mroot.innerHTML)closeModal();
   if((e.key==="Enter"||e.key===" ")&&e.target.classList&&e.target.classList.contains("seg")){e.preventDefault();e.target.dispatchEvent(new MouseEvent("click",{bubbles:true}))}
 });
-S.users.forEach(u=>{if(u.email==="bruce.oshea@demo.klip.cl"&&u.bo===undefined)u.bo=true});
+S.users.forEach(u=>{if(u.email==="bruno.salinas@demo.klip.cl"&&u.bo===undefined)u.bo=true});
 if(S.provWa)PROV.forEach(p=>{if(S.provWa[p.id])p.wa=S.provWa[p.id]});
 buildGen();
 if(ui.screen==="app"&&cur())ui.tab=TABS[role()][0][0];
 render();
+if(ui.screen==="app"&&sessUser()&&sessUser().cambiar)mChangePw(true);
 })();
 </script>
 
