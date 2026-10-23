@@ -94,13 +94,13 @@ function mApprove(id){
 function mActa(id){
   const r=repsAll().find(x=>x.id===id);if(!r)return;
   const p=prop(r.propId),pv=provById(r.provId),o=ownerOf(p);
-  const sched=r.inicioDesc?Array.from({length:r.cuotas},(_,k)=>({ym:ymAdd(r.inicioDesc,k),m:cuotaN(r.monto,r.cuotas,k),ok:k<r.descontadas})):[];
+  const sched=r.inicioDesc?Array.from({length:r.cuotas},(_,k)=>({ym:ymAdd(r.inicioDesc,k),m:cuotaN(r.monto,r.cuotas,k),ok:k<r.descontadas-(r.saldadas||0),sal:k>=r.cuotas-(r.saldadas||0)})):[];
   const canConf=!ui.asUid&&r.estado==="aprobada"&&role()==="tenant"&&r.tenantId===meActor();
   const firma=(t,f,who)=>f?`<div class="firma ok"><span class="eyebrow">${t}</span><b>${esc(f.nombre)}</b><span class="sub">${esc(f.rol||"")}${f.mandato?", con mandato del propietario":""}. Firmado el ${dmy(f.fecha)}</span></div>`:`<div class="firma"><span class="eyebrow">${t}</span><b>${esc(who)}</b><span class="sub">Pendiente</span></div>`;
   openModal("Acta de reparación",`<div class="acta">
     <div class="lines"><div><span>Propiedad</span><span>${esc(p.code)}, ${esc(p.dir)}</span></div><div><span>Solicitada</span><span>${dmy(r.fecha)} por ${esc(nombreActor(r.tenantId))}</span></div><div><span>Reparación</span><span>${esc(r.cat)}: ${esc(r.desc)}</span></div><div><span>Proveedor</span><span>${pv?esc(pv.nombre)+(pv.sec?" (SEC)":""):"Por definir"}</span></div><div class="tot"><span>Monto aprobado</span><span class="num">${clp(r.monto)} en ${r.cuotas} ${r.cuotas===1?"cuota":"cuotas"}${r.cuotas>1?" desde "+clp(cuotaBase(r)):""}</span></div></div>
     <div class="firmas">${firma("Aprueba presupuesto y cuotas",r.aprobProp,o?o.nombre:"Propietario")}${firma("Conformidad del trabajo realizado",r.conformArr,nombreActor(r.tenantId))}</div>
-    ${sched.length?`<div><span class="eyebrow">Descuento en el arriendo</span><div class="tbl-wrap"><table><tbody>${sched.map(s=>`<tr><td>${ymLabel(s.ym)}</td><td class="r num">-${clp(s.m)}</td><td>${s.ok?'<span class="pill p-ok">Descontada</span>':'<span class="pill p-warn">Pendiente</span>'}</td></tr>`).join("")}</tbody></table></div></div>`:""}
+    ${sched.length?`<div><span class="eyebrow">Descuento en el arriendo</span><div class="tbl-wrap"><table><tbody>${sched.map(s=>`<tr><td>${ymLabel(s.ym)}</td><td class="r num">-${clp(s.m)}</td><td>${s.ok?'<span class="pill p-ok">Descontada</span>':s.sal?'<span class="pill p-mute">Saldada en la salida</span>':'<span class="pill p-warn">Pendiente</span>'}</td></tr>`).join("")}</tbody></table></div></div>`:""}
     ${r.rating?`<span>Valoración del arrendatario: <span class="stars">${stars(r.rating)}</span></span>`:""}
     ${canConf?`<form class="form" id="confform"><div class="field"><label for="crat">¿Cómo quedó el trabajo?</label><select id="crat"><option value="5">Excelente</option><option value="4">Bien</option><option value="3">Regular</option><option value="2">Mal</option></select></div><div class="note">Al confirmar firmas el acta y el descuento empieza en el cobro de ${ymLabel(S.periodo.ym)}.</div></form>`:""}
   </div>`,canConf?`<button class="btn sec" data-act="close">Todavía no</button><button class="btn ok" data-act="doconf" data-id="${r.id}">Confirmar y firmar</button>`:`<button class="btn" data-act="close">Cerrar</button>`);
@@ -111,10 +111,10 @@ function mFicha(id){
   const reps=repsAll().filter(r=>r.propId===id).sort((x,y)=>y.fecha.localeCompare(x.fecha));
   openModal("Ficha "+esc(p.code),`<div class="grid" style="gap:16px">
     <div class="lines"><div><span>Dirección</span><span>${esc(p.dir)}, ${esc(p.comuna)}</span></div><div><span>Propietario</span><span>${esc(o?o.nombre:"")}</span></div><div><span>Administradora</span><span>${esc(a?a.nombre:"")} desde ${ymLabel(p.alta)}</span></div><div><span>Canon actual</span><span>${rentLabel(p)}${p.moneda==="UF"?" ("+clp(rentCLP(p))+")":""}</span></div><div><span>Descripción</span><span>${esc(p.desc)}</span></div></div>
-    <div><span class="eyebrow">Arrendatarios desde el alta</span><div class="tbl-wrap"><table><tbody>${p.tenancias.slice().reverse().map(t=>`<tr><td>${esc(nombreActor(t.tid))}</td><td class="num">${ymLabel(t.desde)} a ${t.hasta?ymLabel(t.hasta):"hoy"}</td><td class="r num">${Math.max(1,ymDiff(t.desde,t.hasta||S.periodo.ym)+1)} meses</td></tr>`).join("")||'<tr><td class="muted">Sin arrendatarios registrados</td></tr>'}</tbody></table></div></div>
+    <div><span class="eyebrow">Arrendatarios desde el alta</span><div class="tbl-wrap"><table><tbody>${p.tenancias.slice().reverse().map(t=>`<tr><td>${esc(nombreActor(t.tid))}</td><td class="num">${ymLabel(t.desde)} a ${t.hasta?ymLabel(t.hasta):"hoy"}</td><td class="r num">${Math.max(1,ymDiff(t.desde,t.hasta||S.periodo.ym)+1)} meses${t.salida?`<span class="sub">Salida: ${t.salida.neto>0?"pagó o debe "+clp(t.salida.neto):t.salida.neto<0?"se le devuelven "+clp(-t.salida.neto):"sin saldo"}</span>`:""}</td></tr>`).join("")||'<tr><td class="muted">Sin arrendatarios registrados</td></tr>'}</tbody></table></div></div>
     <div><span class="eyebrow">Arriendos cobrados por año</span><div class="tbl-wrap"><table><tbody>${Object.keys(Y).sort().reverse().map(y=>`<tr><td>${y}</td><td class="r num">${clp(Y[y])}</td></tr>`).join("")||'<tr><td class="muted">Sin pagos</td></tr>'}</tbody></table></div></div>
     <div><span class="eyebrow">Reparaciones (${reps.length})</span><div class="tbl-wrap"><table><tbody>${reps.slice(0,12).map(r=>`<tr><td class="num">${dmy(r.fecha)}</td><td>${esc(r.desc)}</td><td class="r num">${clp(r.monto)}</td><td><button class="link" data-act="acta" data-id="${r.id}">Acta</button></td></tr>`).join("")||'<tr><td class="muted">Sin reparaciones</td></tr>'}</tbody></table></div></div>
-  </div>`,`<button class="btn" data-act="close">Cerrar</button>`);
+  </div>`,`${puedeGestionar(p)&&!ui.asUid?(p.tenantId?`<button class="btn bad" data-act="endc" data-id="${p.id}">Terminar contrato</button>`:`<button class="btn ok" data-act="assign" data-id="${p.id}">Asignar arrendatario</button>`)+'<span style="flex:1"></span>':""}<button class="btn" data-act="close">Cerrar</button>`);
 }
 function mCompose(to){
   openModal("Nuevo mensaje",`<form id="cform" class="form" data-to="${to}"><p style="margin:0">Para <b>${esc(nombreActor(to))}</b> (${rolActor(to)})</p><div class="field"><label for="ctext">Mensaje</label><textarea id="ctext" rows="5" required></textarea></div></form>`,`<button class="btn sec" data-act="close">Cancelar</button><button class="btn wa" data-act="cwa">Enviar por WhatsApp</button><button class="btn" data-act="sendc">Enviar en la plataforma</button>`);
@@ -137,15 +137,22 @@ function mProfile(){
     <div class="field"><label for="pfwa">Mi WhatsApp</label><input id="pfwa" type="tel" placeholder="+56 9 1234 5678" value="${esc(u.wa||waOf(u.actorId))}"></div><span class="muted" style="font-size:13px">Lo usan tus contactos en KLIP para escribirte por WhatsApp.</span></form>`,
   `<button class="btn sec" data-act="changepw">Cambiar contraseña</button><span style="flex:1"></span><button class="btn" data-act="saveprof">Guardar</button>`);
 }
+/* Selector de arrendatario o propietario: uno conocido, o por correo (se vincula si ya tiene cuenta, si no se crea) */
+function personPicker(x,rol,opts){
+  opts=opts||{};const adm=role()==="admin"?meActor():null;
+  const list=rol==="tenant"?libres(adm):conocidos("owner",adm);
+  const lbl=rol==="tenant"?"Arrendatario":"Propietario",sel=opts.def||"new";
+  return `<div class="row"><div class="field"><label for="${x}sel">${lbl}</label><select id="${x}sel" data-picker="${x}">${opts.none?`<option value="none" ${sel==="none"?"selected":""}>${esc(opts.none)}</option>`:""}<option value="new" ${sel==="new"?"selected":""}>Buscar por correo o crear nuevo</option>${list.map(t=>`<option value="${t.id}">${esc(t.nombre)}${emailOf(t.id)?" ("+esc(emailOf(t.id))+")":""}</option>`).join("")}</select></div></div>
+  <div class="row" id="${x}new" ${sel==="new"?"":"hidden"}><div class="field"><label for="${x}em">Correo${rol==="owner"?" (opcional)":""}</label><input id="${x}em" type="email" autocomplete="off" placeholder="nombre@correo.cl"></div><div class="field"><label for="${x}nom">Nombre y apellido</label><input id="${x}nom" autocomplete="off" placeholder="Si ya tiene cuenta, no hace falta"></div></div>`;
+}
 function mNewProp(){
-  const free=S.tenants.filter(t=>!S.props.some(p=>p.tenantId===t.id));
   openModal("Nueva propiedad",`<form id="pform" class="form"><div class="row"><div class="field"><label for="pdir">Dirección</label><input id="pdir" required placeholder="Av. Italia 1450, Depto. 302"></div><div class="field"><label for="pcom">Comuna</label><input id="pcom" required placeholder="Providencia"></div></div>
-  <div class="row"><div class="field"><label for="pown">Propietario</label><select id="pown"><option value="new">Nuevo propietario</option>${S.owners.map(o=>`<option value="${o.id}">${esc(o.nombre)}</option>`).join("")}</select></div><div class="field"><label for="pownn">Nombre del nuevo propietario</label><input id="pownn" placeholder="Nombre y apellido"></div></div>
-  <div class="row"><div class="field"><label for="ptsel">Arrendatario</label><select id="ptsel"><option value="none">Disponible, sin arrendatario</option><option value="new">Nuevo arrendatario</option>${free.map(t=>`<option value="${t.id}">${esc(t.nombre)} (ya tiene cuenta)</option>`).join("")}</select></div><div class="field"><label for="pten">Nombre del nuevo arrendatario</label><input id="pten" placeholder="Nombre y apellido"></div></div>
+  ${personPicker("po","owner")}
+  ${personPicker("pt","tenant",{none:"Disponible, sin arrendatario",def:"none"})}
   <div class="row"><div class="field"><label for="pmon">Moneda del contrato</label><select id="pmon"><option value="UF">UF (reajuste automático)</option><option value="CLP">Pesos (reajuste IPC)</option></select></div><div class="field"><label for="pmonto">Canon mensual</label><input id="pmonto" type="number" min="1" step="any" required placeholder="16"></div></div>
   <div class="row"><div class="field"><label for="pper">Periodicidad reajuste IPC</label><select id="pper"><option value="6">Cada 6 meses</option><option value="12" selected>Cada 12 meses</option></select></div><div class="field"><label for="pval">Valor propiedad (UF)</label><input id="pval" type="number" min="1" placeholder="5800"></div></div>
   <div class="row"><div class="field"><label for="pgc">Comunidad</label><input id="pgc" placeholder="Comunidad Edificio Italia"></div><div class="field"><label for="pgcm">Gasto común mensual ($)</label><input id="pgcm" type="number" min="0" step="1000" placeholder="75000"></div></div>
-  <p class="muted" style="margin:0;font-size:13px">A un arrendatario nuevo se le crea una cuenta con contraseña temporal.</p></form>`,`<button class="btn sec" data-act="close">Cancelar</button><button class="btn" data-act="saveprop">Guardar propiedad</button>`);
+  <p class="muted" style="margin:0;font-size:13px">Si el correo ya tiene cuenta en KLIP, la propiedad se vincula a esa cuenta. Si no, se crea una con contraseña temporal.</p><div id="perr"></div></form>`,`<button class="btn sec" data-act="close">Cancelar</button><button class="btn" data-act="saveprop">Guardar propiedad</button>`);
 }
 function mManual(id){
   const p=prop(id),t=tenantOf(p),tot=aPagarArriendo(p);
@@ -160,7 +167,37 @@ function mCloseMonth(){
 }
 const tempPw=()=>"Klip-"+Math.floor(1000+Math.random()*9000)+String.fromCharCode(65+Math.floor(Math.random()*26));
 function showTemp(u,pw,title){
-  openModal(title,`<div class="receipt"><span>Contraseña temporal para <b>${esc(u.nombre)}</b> (${esc(u.email)}):</span><span class="secret">${esc(pw)}</span><span class="muted">Comunícasela por un canal seguro. Se le pedirá cambiarla al entrar. No se vuelve a mostrar.</span></div>`,`<button class="btn sec" data-act="copytemp" data-pw="${esc(pw)}">Copiar</button><button class="btn" data-act="close">Listo</button>`);
+  const list=Array.isArray(u)?u:[{u,pw}];if(Array.isArray(u))title=pw;
+  openModal(title,`<div class="receipt">${list.map(x=>`<span>Contraseña temporal para <b>${esc(x.u.nombre)}</b> (${esc(x.u.email)}):</span><span class="secret">${esc(x.pw)}</span>`).join("")}<span class="muted">Comunícala por un canal seguro. Se pedirá cambiarla al entrar. No se vuelve a mostrar.</span></div>`,`${list.length===1?`<button class="btn sec" data-act="copytemp" data-pw="${esc(list[0].pw)}">Copiar</button>`:""}<button class="btn" data-act="close">Listo</button>`);
+}
+/* Asignar arrendatario a una propiedad disponible */
+function mAssign(id){
+  const p=prop(id);if(!p||p.tenantId)return;
+  openModal("Asignar arrendatario",`<form id="asform" class="form" data-id="${p.id}"><p class="muted" style="margin:0">${esc(p.code)}, ${esc(p.dir)}, ${esc(p.comuna)}. Disponible desde ${p.vacioDesde?ymLabel(p.vacioDesde):ymLabel(p.alta)}.</p>
+  ${personPicker("as","tenant")}
+  <div class="row"><div class="field"><label for="asini">Inicio del contrato</label><input id="asini" type="date" required value="${todayISO()}"></div><div class="field"><label for="asmonto">Canon mensual (${p.moneda==="UF"?"UF":"$"})</label><input id="asmonto" type="number" min="1" step="any" required value="${p.monto}"></div></div>
+  <div class="row"><div class="field"><label for="asgar">Garantía (${p.moneda==="UF"?"UF":"$"})</label><input id="asgar" type="number" min="0" step="any" value="${p.monto}"></div><div class="field"><label for="asper">Reajuste</label>${p.moneda==="UF"?`<input id="asper" disabled value="UF, automático">`:`<select id="asper"><option value="6" ${p.reajuste.periodo===6?"selected":""}>IPC cada 6 meses</option><option value="12" ${p.reajuste.periodo!==6?"selected":""}>IPC cada 12 meses</option></select>`}</div></div>
+  <div class="note">Si el correo ya tiene cuenta de arrendatario en KLIP (por ejemplo, porque se registró solo), se vincula a esa cuenta. El primer cobro es el de ${ymLabel(S.periodo.ym)}.</div><div id="aserr"></div></form>`,
+  `<button class="btn sec" data-act="close">Cancelar</button><button class="btn ok" data-act="doassign">Asignar y firmar contrato</button>`);
+}
+/* Terminar contrato con liquidación de salida */
+function salidaDe(p){
+  const reps=repairsOn(p),desde=p.paid?0:1;
+  const cuotasPend=reps.reduce((a,r)=>a+cuotasRestantes(r.monto,r.cuotas,r.descontadas+desde),0);
+  const garantia=p.moneda==="UF"?rentaUF(p.garantia,UF()):p.garantia;
+  return Object.assign({arriendo:aPagarArriendo(p),gc:aPagarGC(p),cuotasPend,garantia,reps},calcSalida({arriendo:aPagarArriendo(p),gc:aPagarGC(p),cuotasPend,garantia}));
+}
+function mEnd(id){
+  const p=prop(id),t=tenantOf(p);if(!p||!t)return;
+  const s=salidaDe(p);
+  openModal("Terminar contrato",`<form id="endform" class="form" data-id="${p.id}"><p class="muted" style="margin:0">${esc(t.nombre)} deja ${esc(p.code)}, ${esc(p.dir)}. Arrendatario desde ${dmy(p.inicio)}.</p>
+  <div class="lines"><div><span>Arriendo pendiente${p.abono?" (descontado lo abonado)":""}</span><span class="num">${clp(s.arriendo)}</span></div><div><span>Gastos comunes pendientes</span><span class="num">${clp(s.gc)}</span></div>
+  <div><span>Cuotas de reparación aún sin descontar</span><span class="num">${s.cuotasPend?"-"+clp(s.cuotasPend):"$0"}</span></div><div><span>Garantía a devolver${p.moneda==="UF"?" (UF "+fmt.format(p.garantia)+")":""}</span><span class="num">${s.garantia?"-"+clp(s.garantia):"$0"}</span></div>
+  <div class="tot"><span>${s.neto>0?"Paga el arrendatario":s.neto<0?"Se devuelve al arrendatario":"Saldo"}</span><span class="num">${clp(Math.abs(s.neto))}</span></div></div>
+  <div class="field"><label for="endfecha">Fecha de término</label><input id="endfecha" type="date" required value="${todayISO()}"></div>
+  <div class="field"><label for="endnota">Observaciones de la entrega</label><textarea id="endnota" rows="3" maxlength="600" placeholder="Estado del inmueble, llaves, lecturas de medidores"></textarea></div>
+  <div class="note">La propiedad queda disponible. La cuenta de ${esc(t.nombre.split(" ")[0])} se mantiene con su historial de pagos, sin arriendo vigente. El saldo queda anotado en la ficha.</div></form>`,
+  `<button class="btn sec" data-act="close">Cancelar</button><button class="btn bad" data-act="doend">Terminar contrato</button>`);
 }
 function mChangePw(forced){
   openModal(forced?"Crea tu nueva contraseña":"Cambiar contraseña",`<form id="pwform" class="form">${forced?'<div class="note">Entraste con una contraseña temporal. Elige una nueva para continuar.</div>':`<div class="field"><label for="pw0">Contraseña actual</label><input id="pw0" type="password" autocomplete="current-password" required></div>`}<div class="field"><label for="pw1">Nueva contraseña</label><input id="pw1" type="password" autocomplete="new-password" minlength="8" required></div><div class="field"><label for="pw2">Repite la nueva contraseña</label><input id="pw2" type="password" autocomplete="new-password" required></div><span class="muted" style="font-size:13px">Mínimo 8 caracteres, con al menos una letra y un número.</span><div id="pwerr"></div></form>`,`${forced?"":'<button class="btn sec" data-act="close">Cancelar</button>'}<button class="btn" data-act="savepw" data-forced="${forced?1:0}">Guardar contraseña</button>`);

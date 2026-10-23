@@ -1,6 +1,29 @@
 /* KLIP: eventos de la interfaz y arranque */
 "use strict";
 /* Eventos */
+/* Lee un selector de persona sin tocar los datos: devuelve {id}, {id,vincula}, {crear} o {err} */
+function leerPersona(x,rol){
+  const g=k=>{const e=document.getElementById(x+k);return e?e.value.trim():""};
+  const sel=g("sel");
+  if(sel==="none")return {id:null};
+  if(sel!=="new")return {id:sel};
+  const em=g("em").toLowerCase(),nom=g("nom"),quien=rol==="tenant"?"del arrendatario":"del propietario";
+  if(em&&!emailValido(em))return {err:"El correo "+quien+" no tiene un formato válido."};
+  if(rol==="tenant"&&!em)return {err:"Escribe el correo del arrendatario. Con él se vincula su cuenta o se le crea una."};
+  if(em){const u=S.users.find(x=>x.email.toLowerCase()===em);
+    if(u){if(u.role!==rol)return {err:"Ese correo ya pertenece a una cuenta de "+ROLES[u.role].toLowerCase()+"."};return {id:u.actorId,vincula:u}}}
+  if(!nom)return {err:em?"No hay ninguna cuenta con ese correo. Escribe el nombre "+quien+" para crearla.":"Escribe el nombre "+quien+"."};
+  return {crear:{nombre:nom,email:em}};
+}
+/* Ejecuta el plan de leerPersona: crea la ficha y, si hay correo, la cuenta con contraseña temporal */
+async function crearPersona(plan,rol){
+  if(!plan.crear)return {id:plan.id};
+  const id=(rol==="tenant"?"t":"o")+uid("n"),c=plan.crear;
+  if(rol==="tenant")S.tenants.push({id,nombre:c.nombre,desde:todayISO(),wa:""});else S.owners.push({id,nombre:c.nombre,wa:""});
+  if(!c.email)return {id};
+  const pw=tempPw(),u={id:uid("u"),nombre:c.nombre,email:c.email,role:rol,actorId:id,hash:await hashPw(pw),activo:true,bloqueado:false,intentos:0,ultimo:null,cambiar:true,wa:""};
+  S.users.push(u);return {id,nuevo:{u,pw}};
+}
 const sig=()=>{const u=cur();return {nombre:u.nombre,rol:ROLES[u.role],fecha:nowISO()}};
 document.addEventListener("click",async e=>{
   const el=e.target.closest("[data-act]");if(!el)return;
@@ -57,18 +80,49 @@ document.addEventListener("click",async e=>{
       else{const hoy=todayISO();S.hist.push({id:uid("h"),f:hoy,ym:S.periodo.ym,p:p.id,t:p.tenantId,c:"A",m,md:md+" (abono manual)",d:0,r:null});p.abono=(p.abono||0)+m;p.lastPay=hoy;log("Abono manual",clp(m)+" con "+md+" en "+p.dir+", queda "+clp(tot-m))}
       save();closeModal();render();toast(m===tot?"Pago de "+clp(m)+" registrado":"Abono de "+clp(m)+" registrado. Queda "+clp(tot-m));break;}
     case "newprop":mNewProp();break;
-    case "saveprop":{const f=document.getElementById("pform");if(!f.reportValidity())return;const v=id=>document.getElementById(id).value.trim();
-      const nIdx=S.props.length+1,id="P"+pad3(nIdx)+uid("").slice(0,3);let tid=null,temp=null,nu=null,oid=v("pown");
-      if(oid==="new"){if(!v("pownn")){toast("Escribe el nombre del propietario");return}oid="o"+uid("n");S.owners.push({id:oid,nombre:v("pownn"),wa:""})}
-      const ts=v("ptsel");
-      if(ts==="new"){if(!v("pten")){toast("Escribe el nombre del arrendatario");return}tid="t"+uid("n");S.tenants.push({id:tid,nombre:v("pten"),desde:todayISO(),wa:""});
-        let em=slug(v("pten"))+"@demo.klip.cl";if(S.users.some(u=>u.email===em))em=slug(v("pten"))+"."+nIdx+"@demo.klip.cl";
-        temp=tempPw();nu={id:uid("u"),nombre:v("pten"),email:em,role:"tenant",actorId:tid,hash:await hashPw(temp),activo:true,bloqueado:false,intentos:0,ultimo:null,cambiar:true,wa:""};S.users.push(nu)}
-      else if(ts!=="none"){tid=ts;const t=byId(S.tenants,tid);if(t)t.desde=todayISO()}
+    case "saveprop":{const f=document.getElementById("pform");if(!f.reportValidity())return;const v=id=>document.getElementById(id).value.trim(),err=document.getElementById("perr");
+      const po=leerPersona("po","owner"),pt=leerPersona("pt","tenant"),e1=po.err||pt.err;if(e1){err.innerHTML=`<div class="err">${esc(e1)}</div>`;return}
+      const nIdx=S.props.length+1,id="P"+pad3(nIdx)+uid("").slice(0,3),code="C:"+pad3(nIdx);
+      const o=await crearPersona(po,"owner"),t=await crearPersona(pt,"tenant"),oid=o.id,tid=t.id;
+      if(tid&&!S.props.some(x=>x.tenantId===tid)){const tt=byId(S.tenants,tid);if(tt)tt.desde=todayISO()}
       const mon=v("pmon"),hoy=todayISO(),adm=role()==="admin"?meActor():"a1",A=byId(S.administradoras,adm);
-      S.props.push({id,code:"C:"+pad3(nIdx),adminId:adm,dir:v("pdir"),comuna:v("pcom"),ciudad:A?A.ciudad:"Santiago",ownerId:oid,tenantId:tid,moneda:mon,monto:Number(v("pmonto")),reajuste:{tipo:mon==="UF"?"UF":"IPC",periodo:Number(v("pper")),ultimo:hoy},inicio:hoy,garantia:Number(v("pmonto")),gc:{comunidad:v("pgc")||"Sin comunidad",monto:Number(v("pgcm")||0)},desc:"Por completar",valorUF:Number(v("pval")||0),alta:S.periodo.ym,paid:false,deuda:0,gcPaid:false,gcDeuda:0,lastPay:null,vacioDesde:null,tenancias:tid?[{tid,desde:S.periodo.ym,hasta:null}]:[]});
-      log("Propiedad creada","C:"+pad3(nIdx)+" "+v("pdir"));save();closeModal();render();
-      if(nu)showTemp(nu,temp,"Cuenta creada para el arrendatario");else toast("Propiedad C:"+pad3(nIdx)+" creada");break;}
+      S.props.push({id,code,adminId:adm,dir:v("pdir"),comuna:v("pcom"),ciudad:A?A.ciudad:"Santiago",ownerId:oid,tenantId:tid,moneda:mon,monto:Number(v("pmonto")),reajuste:{tipo:mon==="UF"?"UF":"IPC",periodo:Number(v("pper")),ultimo:hoy},inicio:hoy,garantia:Number(v("pmonto")),gc:{comunidad:v("pgc")||"Sin comunidad",monto:Number(v("pgcm")||0)},desc:"Por completar",valorUF:Number(v("pval")||0),alta:S.periodo.ym,paid:false,deuda:0,abono:0,gcPaid:false,gcDeuda:0,lastPay:null,vacioDesde:tid?null:S.periodo.ym,tenancias:tid?[{tid,desde:S.periodo.ym,hasta:null}]:[]});
+      log("Propiedad creada",code+" "+v("pdir"));
+      if(po.vincula)log("Cuenta vinculada","Propietario "+po.vincula.email+" en "+code);
+      if(pt.vincula)log("Cuenta vinculada","Arrendatario "+pt.vincula.email+" en "+code);
+      if(tid)S.msgs.push({id:uid("m"),from:adm,to:tid,text:"Te damos la bienvenida a "+v("pdir")+". Desde ahora puedes pagar tu arriendo y tus gastos comunes en KLIP.",fecha:hoy,read:false,canal:"plataforma"});
+      save();closeModal();render();
+      const nuevos=[o.nuevo,t.nuevo].filter(Boolean);
+      if(nuevos.length)showTemp(nuevos,nuevos.length===1?"Cuenta creada":"Cuentas creadas");else toast("Propiedad "+code+" creada");break;}
+    case "assign":if(!ui.asUid)mAssign(el.dataset.id);break;
+    case "doassign":{if(ui.asUid)return;const f=document.getElementById("asform");if(!f.reportValidity())return;const p=prop(f.dataset.id);if(!puedeGestionar(p)||p.tenantId){closeModal();return}
+      const err=document.getElementById("aserr"),pl=leerPersona("as","tenant"),ini=document.getElementById("asini").value,monto=Number(document.getElementById("asmonto").value),gar=Number(document.getElementById("asgar").value||0);
+      const e1=pl.err||(!(monto>0)?"Indica un canon mayor que cero.":gar<0?"La garantía no puede ser negativa.":"");if(e1){err.innerHTML=`<div class="err">${esc(e1)}</div>`;return}
+      const r=await crearPersona(pl,"tenant"),tid=r.id;
+      if(!S.props.some(x=>x.tenantId===tid)){const tt=byId(S.tenants,tid);if(tt)tt.desde=ini}
+      Object.assign(p,{tenantId:tid,monto,garantia:gar,inicio:ini,vacioDesde:null,paid:false,deuda:0,abono:0,gcPaid:false,gcDeuda:0,lastPay:null});
+      p.reajuste.ultimo=ini;if(p.moneda!=="UF")p.reajuste.periodo=Number(document.getElementById("asper").value);
+      p.tenancias.push({tid,desde:S.periodo.ym,hasta:null});
+      const hoy=todayISO(),tn=nombreActor(tid);
+      S.msgs.push({id:uid("m"),from:p.adminId,to:tid,text:"Te damos la bienvenida a "+p.dir+". Tu contrato empieza el "+dmy(ini)+" y el primer cobro es el de "+ymLabel(S.periodo.ym)+".",fecha:hoy,read:false,canal:"plataforma"});
+      S.msgs.push({id:uid("m"),from:p.adminId,to:p.ownerId,text:"Tu propiedad "+p.dir+" ya tiene arrendatario: "+tn+", desde el "+dmy(ini)+". Canon "+rentLabel(p)+".",fecha:hoy,read:false,canal:"plataforma"});
+      log("Contrato iniciado",p.code+" "+p.dir+", "+tn+(pl.vincula?" (cuenta existente vinculada)":r.nuevo?" (cuenta nueva)":""));
+      save();closeModal();render();
+      if(r.nuevo)showTemp(r.nuevo.u,r.nuevo.pw,"Cuenta creada para el arrendatario");else toast(tn+" asignado a "+p.code);break;}
+    case "endc":if(!ui.asUid)mEnd(el.dataset.id);break;
+    case "doend":{if(ui.asUid)return;const f=document.getElementById("endform");if(!f.reportValidity())return;const p=prop(f.dataset.id);if(!puedeGestionar(p)||!p.tenantId){closeModal();return}
+      const t=tenantOf(p),s=salidaDe(p),fecha=document.getElementById("endfecha").value,nota=document.getElementById("endnota").value.trim(),hoy=todayISO();
+      const sal={fecha,arriendo:s.arriendo,gc:s.gc,cuotasPend:s.cuotasPend,garantia:s.garantia,neto:s.neto,nota};
+      const tn=p.tenancias.find(x=>x.tid===t.id&&!x.hasta);
+      if(tn){tn.hasta=S.periodo.ym;tn.salida=sal}else p.tenancias.push({tid:t.id,desde:S.periodo.ym,hasta:S.periodo.ym,salida:sal});
+      /* Las cuotas que quedaban se compensan en la liquidación de salida */
+      s.reps.forEach(r=>{r.saldadas=r.cuotas-r.descontadas;r.descontadas=r.cuotas});
+      Object.assign(p,{tenantId:null,vacioDesde:S.periodo.ym,paid:false,deuda:0,abono:0,gcPaid:false,gcDeuda:0});
+      const txt=s.neto>0?"queda un saldo a tu cargo de "+clp(s.neto):s.neto<0?"se te devolverán "+clp(-s.neto):"no queda saldo pendiente";
+      S.msgs.push({id:uid("m"),from:p.adminId,to:t.id,text:"Registramos el término de tu contrato en "+p.dir+" el "+dmy(fecha)+". Con la garantía y los saldos, "+txt+".",fecha:hoy,read:false,canal:"plataforma"});
+      S.msgs.push({id:uid("m"),from:p.adminId,to:p.ownerId,text:"Terminó el contrato de "+t.nombre+" en "+p.dir+" ("+dmy(fecha)+"). La propiedad queda disponible. Liquidación de salida: "+(s.neto>0?"el arrendatario paga "+clp(s.neto):s.neto<0?"se le devuelven "+clp(-s.neto):"sin saldo")+".",fecha:hoy,read:false,canal:"plataforma"});
+      log("Contrato terminado",p.code+" "+p.dir+", "+t.nombre+". Saldo de salida "+(s.neto<0?"-":"")+clp(Math.abs(s.neto)));
+      save();closeModal();render();toast("Contrato terminado. "+p.code+" queda disponible");break;}
     case "saveuf":{const u=Number(document.getElementById("uf").value);if(u>0){S.params.uf=Math.round(u);log("Parámetro","UF actualizada a "+clp(S.params.uf));save();render();toast("UF actualizada a "+clp(S.params.uf))}break;}
     case "applyipc":{const pct=Number(document.getElementById("ipc").value);if(!(pct>-50&&pct<50)){toast("Ingresa una variación IPC válida");return}S.params.ipc=pct;const hoy=todayISO();let c=0;myProps().forEach(p=>{if(p.tenantId&&p.reajuste.tipo==="IPC"&&proxReajuste(p)<=hoy){p.monto=reajusteIPC(p.monto,pct);while(proxReajuste(p)<=hoy)p.reajuste.ultimo=proxReajuste(p);c++;S.msgs.push({id:uid("m"),from:p.adminId,to:p.tenantId,text:"Tu arriendo se reajustó por IPC ("+String(pct).replace(".",",")+"%). Nuevo canon: "+clp(p.monto)+".",fecha:hoy,read:false,canal:"plataforma"})}});log("Reajuste IPC",c+" contratos, "+String(pct).replace(".",",")+"%");save();render();toast(c+" contrato"+(c===1?"":"s")+" reajustado"+(c===1?"":"s"));break;}
     case "closemonth":if(role()==="bo"&&!ui.asUid)mCloseMonth();break;
@@ -135,6 +189,7 @@ document.addEventListener("change",async e=>{
   if(t.id==="histyear"){ui.year=t.value;render();}
   if(t.id==="provcat"){ui.provCat=t.value;render();}
   if(t.id==="provcity"){ui.provCity=t.value;render();}
+  if(t.dataset&&t.dataset.picker){const w=document.getElementById(t.dataset.picker+"new");if(w)w.hidden=t.value!=="new";}
   if(t.id==="rrol"){const w=document.getElementById("rempw");if(w)w.hidden=t.value!=="admin";}
   if(t.id==="rcat"){const f=document.getElementById("repform");const p=prop(f.dataset.id);document.getElementById("rprov").innerHTML=provOptions(p.ciudad,t.value,null);}
   if(t.dataset&&t.dataset.labstate){const id=t.dataset.labstate;try{await labUpdate(id,{estado:t.value,actualizado:nowISO()});log("Lab","Estado cambiado a "+t.value);save();toast("Estado actualizado")}catch(err){labErr(err);render()}}

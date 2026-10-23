@@ -25,7 +25,7 @@ function buildGen(){
     const owner=byId(S.owners,p.ownerId);
     const disc={};
     p.tenancias.forEach(tn=>{
-      const end=tn.hasta||GEN_END;const tname=nombreActor(tn.tid);
+      const end=tn.hasta&&tn.hasta<GEN_END?tn.hasta:GEN_END;const tname=nombreActor(tn.tid);
       let t=ymAdd(tn.desde,ri(6,26));
       while(ymDiff(t,end)>=3&&t<=ymAdd(GEN_END,-3)){
         const cat=CATS[Math.floor(R()*CATS.length)];
@@ -68,6 +68,12 @@ function clearSession(){try{sessionStorage.removeItem(SKEY);localStorage.removeI
 /* Cálculos de negocio */
 function byId(arr,id){return arr.find(x=>x.id===id)}
 const prop=id=>byId(S.props,id);
+const userOf=actorId=>S.users.find(u=>u.actorId===actorId);
+const emailOf=actorId=>{const u=userOf(actorId);return u?u.email:""};
+/* Personas que la administradora ya conoce: las de sus propiedades, actuales o anteriores. El resto se busca por correo */
+const conocidos=(rol,adm)=>{const ps=adm?S.props.filter(p=>p.adminId===adm):S.props;const ids=new Set();ps.forEach(p=>{if(rol==="owner")ids.add(p.ownerId);else p.tenancias.forEach(t=>ids.add(t.tid))});return (rol==="owner"?S.owners:S.tenants).filter(x=>ids.has(x.id))};
+const puedeGestionar=p=>!!p&&role()==="admin"&&p.adminId===meActor();
+const libres=adm=>conocidos("tenant",adm).filter(t=>!S.props.some(p=>p.tenantId===t.id));
 const tenantOf=p=>p&&p.tenantId?byId(S.tenants,p.tenantId):null;
 const ownerOf=p=>byId(S.owners,p.ownerId);
 const admOf=p=>byId(S.administradoras,p.adminId);

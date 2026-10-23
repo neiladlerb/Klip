@@ -99,3 +99,24 @@ test("generador pseudoaleatorio determinista",()=>{
 test("hash de contraseña de la demo",async()=>{
   assert.equal(await C.hashPw("Klip2026!"),"d4d094474146caeb0a318f2ff871004afdaca7d1126026a2f8b609809d232c4b");
 });
+
+test("cuotas que quedan por descontar",()=>{
+  assert.equal(C.cuotasRestantes(270000,3,1),180000);
+  assert.equal(C.cuotasRestantes(385000,3,0),385000);
+  assert.equal(C.cuotasRestantes(385000,3,2),128334);
+  assert.equal(C.cuotasRestantes(385000,3,3),0);
+  assert.equal(C.cuotasRestantes(60000,2,-1),60000);
+});
+
+test("liquidación de salida al terminar un contrato",()=>{
+  assert.deepEqual(C.calcSalida({arriendo:0,gc:0,cuotasPend:180000,garantia:610000}),{cargos:0,abonos:790000,neto:-790000});
+  assert.deepEqual(C.calcSalida({arriendo:900000,gc:62000,cuotasPend:0,garantia:450000}),{cargos:962000,abonos:450000,neto:512000});
+  assert.equal(C.calcSalida({}).neto,0);
+});
+
+test("formato de correo",()=>{
+  assert.ok(C.emailValido("ana.perez@correo.cl"));
+  assert.ok(!C.emailValido("ana@correo"));
+  assert.ok(!C.emailValido("ana perez@correo.cl"));
+  assert.ok(!C.emailValido(""));
+});

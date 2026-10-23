@@ -37,8 +37,14 @@ const aPagar=(renta,deuda,desc,abono)=>Math.max(0,renta+(deuda||0)-(desc||0)-(ab
 function calcLiquidacion(bruto,desc,pctAdm){const com=Math.round(bruto*pctAdm/100),iva=Math.round(com*IVA);return {com,iva,neto:bruto-desc-com-iva}}
 /* Reajuste IPC de un canon en pesos, redondeado a miles */
 const reajusteIPC=(monto,pct)=>Math.round(monto*(1+pct/100)/1000)*1000;
+/* Suma de las cuotas k = desde..n-1 que quedan por descontar */
+const cuotasRestantes=(monto,n,desde)=>{let s=0;for(let k=Math.max(0,desde);k<n;k++)s+=cuotaN(monto,n,k);return s};
+/* Liquidación de salida al terminar un contrato: lo que debe el arrendatario menos lo que se le devuelve.
+   neto > 0: paga el arrendatario; neto < 0: el propietario le devuelve esa cantidad */
+function calcSalida({arriendo=0,gc=0,cuotasPend=0,garantia=0}){const cargos=arriendo+gc,abonos=cuotasPend+garantia;return {cargos,abonos,neto:cargos-abonos}}
+const emailValido=e=>/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(e||""));
 const passwordValida=p=>typeof p==="string"&&p.length>=8&&/[A-Za-z]/.test(p)&&/\d/.test(p);
 const waDigits=s=>String(s||"").replace(/\D/g,"");
 const waUrl=(num,text)=>{const d=waDigits(num);return "https://wa.me/"+(d.length>=8?d:"")+"?text="+encodeURIComponent(text)};
 
-if(typeof module!=="undefined"&&module.exports)module.exports={fmt,clp,mill,esc,MESES,pad,pad3,dmy,addMonths,ymAdd,ymDiff,ymLabel,ymShort,slug,pct1,stars,rng,hashPw,UFA,ufAt,IVA,cuotaN,rentaUF,aPagar,calcLiquidacion,reajusteIPC,passwordValida,waDigits,waUrl};
+if(typeof module!=="undefined"&&module.exports)module.exports={fmt,clp,mill,esc,MESES,pad,pad3,dmy,addMonths,ymAdd,ymDiff,ymLabel,ymShort,slug,pct1,stars,rng,hashPw,UFA,ufAt,IVA,cuotaN,rentaUF,aPagar,calcLiquidacion,cuotasRestantes,calcSalida,emailValido,reajusteIPC,passwordValida,waDigits,waUrl};

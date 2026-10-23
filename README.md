@@ -58,6 +58,9 @@ Prueban las reglas de negocio de `js/calc.js`: formato de pesos, fechas, interpo
 - **Reparaciones:** las aprueba el propietario (o la administradora con mandato) y las confirma el arrendatario. Se descuentan del arriendo en 1 a 6 cuotas, y la última cuota absorbe el redondeo.
 - **Cierre de mes:** solo lo hace el back office. Lo impago pasa a saldo anterior y la cuota de reparación de ese mes se da por aplicada.
 - **Pagos manuales:** la administradora registra pagos completos o abonos parciales.
+- **Asignar arrendatario:** la administradora asigna una propiedad disponible por correo. Si el correo ya tiene cuenta de arrendatario (por ejemplo, porque se registró solo), se vincula; si no, se crea la cuenta con contraseña temporal. Lo mismo vale para el propietario al dar de alta una propiedad.
+- **Terminar contrato:** calcula la liquidación de salida (arriendo y gastos comunes pendientes, menos cuotas de reparación sin descontar y garantía a devolver), deja la propiedad disponible y anota el saldo en la ficha. El arrendatario conserva su cuenta y su historial.
+- **Privacidad entre administradoras:** cada administradora solo ve en sus listas a las personas de sus propias propiedades. Al resto se las encuentra por correo.
 - **Suplantación:** el back office puede ver la plataforma como otro usuario. La auditoría registra a ambos y no se pueden firmar actas en su nombre.
 
 ## Antes de pasar a producción
