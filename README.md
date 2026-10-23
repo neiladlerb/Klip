@@ -38,7 +38,11 @@ js/estado.js        Estado guardado, sesión, cálculos sobre los datos y Lab
 js/vistas.js        Pantallas de cada perfil y gráficos
 js/modales.js       Ventanas modales
 js/eventos.js       Eventos de la interfaz y arranque
-tests/              Tests de los cálculos
+api/                Funciones de servidor de Vercel (email)
+api/_lib/email/     Plantillas y envío de emails con Resend
+supabase/           Esquema de base de datos, permisos y sus pruebas
+docs/               Paso a producción y DNS
+tests/              Tests de cálculos y emails
 ```
 
 Son scripts clásicos que comparten el ámbito global y se cargan en el orden de `index.html`. `calc.js` no depende del estado ni de la página, por eso se puede probar con Node.
@@ -46,7 +50,8 @@ Son scripts clásicos que comparten el ámbito global y se cargan en el orden de
 ## Tests
 
 ```bash
-npm test
+npm test          # cálculos y emails, sin dependencias
+npm run test:db   # esquema y permisos; necesita PostgreSQL (PGHOST, PGUSER...)
 ```
 
 Prueban las reglas de negocio de `js/calc.js`: formato de pesos, fechas, interpolación de la UF, reparto de cuotas, saldo a pagar, liquidación con comisión e IVA, reajuste IPC y política de contraseñas. Se ejecutan en GitHub Actions en cada push. No hace falta instalar dependencias.
@@ -63,7 +68,11 @@ Prueban las reglas de negocio de `js/calc.js`: formato de pesos, fechas, interpo
 - **Privacidad entre administradoras:** cada administradora solo ve en sus listas a las personas de sus propias propiedades. Al resto se las encuentra por correo.
 - **Suplantación:** el back office puede ver la plataforma como otro usuario. La auditoría registra a ambos y no se pueden firmar actas en su nombre.
 
-## Antes de pasar a producción
+## Paso a producción
+
+El plan, las cuentas y las variables de entorno están en [docs/produccion.md](docs/produccion.md). La configuración de DNS, en [docs/dns-klip.cl.md](docs/dns-klip.cl.md).
+
+## Pendiente para producción
 
 - Backend con autenticación en servidor y contraseñas con Argon2 o bcrypt.
 - Auditoría en servidor y no modificable.

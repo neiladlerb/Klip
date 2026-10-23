@@ -1,0 +1,6 @@
+# Archivos internos que no deben publicarse en la web
+supabase/
+tests/
+scripts/
+docs/
+.github/
