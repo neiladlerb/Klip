@@ -1,0 +1,10 @@
+{
+  "name": "klip",
+  "version": "0.5.0",
+  "private": true,
+  "description": "KLIP.CL, plataforma de pago de arriendos (demo funcional)",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "test": "node --test tests/*.test.js"
+  }
+}
